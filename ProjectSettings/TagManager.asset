@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - Blackhole
+  - GravitySwap
+  - Switch
   layers:
   - Default
   - TransparentFX

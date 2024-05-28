@@ -7,11 +7,13 @@ using UnityEngine.SceneManagement;
 public class PlayerScript : MonoBehaviour
 {
     private float speed = 4f;
+    private bool canSwitch = true;
     private Rigidbody rb;
     private GravityDirection currentGravityDirection = GravityDirection.Down;
     private Transform cameraTransform;
     private Vector3 initialCameraOffset;
     private SpriteRenderer spriteRenderer;
+    private GameObject currentGravitySwap; // Reference to the current GravitySwap object
 
     private enum GravityDirection
     {
@@ -62,7 +64,10 @@ public class PlayerScript : MonoBehaviour
         // Apply the new position using Rigidbody
         rb.MovePosition(newPosition);
 
-        Gravity();
+        if (canSwitch)
+        {
+            Gravity();
+        };
     }
 
     void Gravity()
@@ -90,7 +95,6 @@ public class PlayerScript : MonoBehaviour
             // Gravity down (normal)
             SwitchGravity(new Vector3(0, -9.81f, 0), Quaternion.Euler(0, 0, 0), GravityDirection.Down);
             AdjustSpriteOrientation(GravityDirection.Down);
-            spriteRenderer.flipY = false;
         }
     }
 
@@ -118,9 +122,35 @@ public class PlayerScript : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if(other.CompareTag("Blackhole"))
+        if (other.CompareTag("Blackhole"))
         {
             SceneManager.LoadScene("Menu");
         }
+        if (other.CompareTag("GravitySwap"))
+        {
+            SwitchGravity(new Vector3(0, 9.81f, 0), Quaternion.Euler(180, 0, 0), GravityDirection.Up);
+            AdjustSpriteOrientation(GravityDirection.Up);
+            canSwitch = false;
+            currentGravitySwap = other.gameObject; // Store the reference to the GravitySwap object
+        }
+        if(other.CompareTag("Switch"))
+        {
+            Destroy(other.gameObject);
+            if (currentGravitySwap != null)
+            {
+                Destroy(currentGravitySwap); // Destroy the GravitySwap object
+                currentGravitySwap = null; // Clear the reference
+                canSwitch = true; // Allow gravity switching again
+            }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("GravitySwap"))
+        {
+            canSwitch = true; // Unlock gravity switching
+        }
     }
 }
+
