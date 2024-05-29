@@ -7,6 +7,8 @@ TagManager:
   - Blackhole
   - GravitySwap
   - Switch
+  - Greenhole
+  - Bluehole
   layers:
   - Default
   - TransparentFX

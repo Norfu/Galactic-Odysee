@@ -14,6 +14,7 @@ public class PlayerScript : MonoBehaviour
     private Vector3 initialCameraOffset;
     private SpriteRenderer spriteRenderer;
     private GameObject currentGravitySwap; // Reference to the current GravitySwap object
+    public string SceneToLoad;
 
     private enum GravityDirection
     {
@@ -124,7 +125,7 @@ public class PlayerScript : MonoBehaviour
     {
         if (other.CompareTag("Blackhole"))
         {
-            SceneManager.LoadScene("Menu");
+            SceneManager.LoadScene(SceneToLoad);
         }
         if (other.CompareTag("GravitySwap"))
         {
