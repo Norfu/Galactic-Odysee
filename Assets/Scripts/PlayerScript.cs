@@ -16,7 +16,12 @@ public class PlayerScript : MonoBehaviour
     private Animator animator; // Reference to the Animator component
     private bool isGrounded = true; // Track if the player is grounded
     public string SceneToLoad;
-
+    public AudioSource walkSound;
+    public AudioSource gravitySound;
+    public AudioSource landSound;
+    public AudioSource teleportSound;
+    public AudioSource endTeleportSound;
+    public AudioSource forcefieldSound;
     private enum GravityDirection
     {
         Up,
@@ -55,15 +60,19 @@ public class PlayerScript : MonoBehaviour
         {
             case GravityDirection.Up:
                 movement = new Vector3(-horizontalInput, 0, 0); // Invert X-axis movement
+                walkSound.Play();
                 break;
             case GravityDirection.Down:
                 movement = new Vector3(horizontalInput, 0, 0);
+                walkSound.Play();
                 break;
             case GravityDirection.Left:
                 movement = new Vector3(0, -horizontalInput, 0); // Move along Y-axis
+                walkSound.Play();
                 break;
             case GravityDirection.Right:
                 movement = new Vector3(0, horizontalInput, 0); // Invert Y-axis movement
+                walkSound.Play();
                 break;
         }
 
@@ -106,6 +115,7 @@ public class PlayerScript : MonoBehaviour
         Physics.gravity = newGravity;
         transform.rotation = newRotation;
         currentGravityDirection = newGravityDirection;
+        gravitySound.Play();
     }
 
     void AdjustSpriteOrientation(GravityDirection newGravityDirection)
@@ -127,6 +137,7 @@ public class PlayerScript : MonoBehaviour
     {
         if (other.CompareTag("Blackhole"))
         {
+            endTeleportSound.Play();
             SceneManager.LoadScene(SceneToLoad);
         }
         if (other.CompareTag("GravitySwap"))
@@ -134,10 +145,12 @@ public class PlayerScript : MonoBehaviour
             SwitchGravity(new Vector3(0, 9.81f, 0), Quaternion.Euler(180, 0, 0), GravityDirection.Up);
             AdjustSpriteOrientation(GravityDirection.Up);
             canSwitch = false;
-            currentGravitySwap = other.gameObject; 
+            currentGravitySwap = other.gameObject;
+            forcefieldSound.Play();
         }
         if (other.CompareTag("Switch"))
         {
+            teleportSound.Play();
             Destroy(other.gameObject);
             if (currentGravitySwap != null)
             {
@@ -149,6 +162,8 @@ public class PlayerScript : MonoBehaviour
         if (other.CompareTag("Ground"))
         {
             isGrounded = true;
+            landSound.Play();
+            animator.ResetTrigger("Landing");
             animator.SetTrigger("Landing");
         }
     }
@@ -216,6 +231,7 @@ public class PlayerScript : MonoBehaviour
     {
         if (!isGrounded && rb.velocity.y < 0)
         {
+            animator.ResetTrigger("Falling");
             animator.SetTrigger("Falling");
         }
     }

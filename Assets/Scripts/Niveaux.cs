@@ -28,12 +28,7 @@ public class Niveaux : MonoBehaviour
 
     public void Levels2()
     {
-        SceneManager.LoadScene(leveltoload2);
-    }
-
-    public void Levels3()
-    {
-        SceneManager.LoadScene(leveltoload3);
+        SceneManager.LoadScene("Fin");
     }
 
     public void Retour()

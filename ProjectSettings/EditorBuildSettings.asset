@@ -13,13 +13,13 @@ EditorBuildSettings:
     guid: 2b4c952923bde744a8a9e7fd2db0d8a1
   - enabled: 1
     path: Assets/Scenes/Tutoriel.unity
-    guid: 8abcd442d375a9f46b3e425d8acc1c47
-  - enabled: 1
+    guid: 5da6158777ccd6741993a9d589a791af
+  - enabled: 0
     path: Assets/Scenes/Easteregg.unity
     guid: 744d05faf6517624b900c0f9638cf0d7
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/SampleScene.unity
-    guid: 9fc0d4010bbf28b4594072e72b8655ab
+    guid: 5d92d37a9b7eb8244b698e335affa399
   - enabled: 1
     path: Assets/Scenes/LevelOne.unity
     guid: 8d4fa99157102324da14cdce06cf74a5
@@ -32,4 +32,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/LevelTwo.unity
     guid: 67035b7550a34b844af20f1d4b068a86
+  - enabled: 1
+    path: Assets/Scenes/Fin.unity
+    guid: 5b59f7e50724e174a98dd2caaab95833
   m_configObjects: {}
