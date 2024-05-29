@@ -9,6 +9,7 @@ TagManager:
   - Switch
   - Greenhole
   - Bluehole
+  - Ground
   layers:
   - Default
   - TransparentFX

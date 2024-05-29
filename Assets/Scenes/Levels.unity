@@ -1184,9 +1184,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   leveltoload: Tutoriel
-  leveltoload1: LevelOne
-  leveltoload2: LevelTwo
-  leveltoload3: LevelThree
+  leveltoload1: LevelTwo
+  leveltoload2: LevelThree
+  leveltoload3: 
   retour: Menu
 --- !u!1 &1494695028
 GameObject:

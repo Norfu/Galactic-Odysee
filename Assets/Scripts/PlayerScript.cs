@@ -4,16 +4,17 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Animator))]
 public class PlayerScript : MonoBehaviour
 {
     private float speed = 4f;
     private bool canSwitch = true;
     private Rigidbody rb;
     private GravityDirection currentGravityDirection = GravityDirection.Down;
-    private Transform cameraTransform;
-    private Vector3 initialCameraOffset;
     private SpriteRenderer spriteRenderer;
     private GameObject currentGravitySwap; // Reference to the current GravitySwap object
+    private Animator animator; // Reference to the Animator component
+    private bool isGrounded = true; // Track if the player is grounded
     public string SceneToLoad;
 
     private enum GravityDirection
@@ -28,15 +29,25 @@ public class PlayerScript : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
 
-        // Bloquer la rotation
+        // Block rotation
         rb.constraints = RigidbodyConstraints.FreezeRotation;
 
         spriteRenderer = GetComponent<SpriteRenderer>();
+        animator = GetComponent<Animator>();
     }
 
     void Update()
     {
-        // Mouvement horizontal (pas de mouvement vertical vu qu'on a la gravité)
+        HandleMovement();
+        if (canSwitch)
+        {
+            HandleGravitySwitching();
+        }
+        UpdateAnimationStates();
+    }
+
+    void HandleMovement()
+    {
         float horizontalInput = Input.GetAxis("Horizontal");
         Vector3 movement = Vector3.zero;
 
@@ -56,44 +67,35 @@ public class PlayerScript : MonoBehaviour
                 break;
         }
 
-        // Calculate new position
         Vector3 newPosition = rb.position + movement * speed * Time.deltaTime;
-
-        // Lock the Z position
         newPosition.z = 0;
-
-        // Apply the new position using Rigidbody
         rb.MovePosition(newPosition);
 
-        if (canSwitch)
-        {
-            Gravity();
-        };
+        // Flip the sprite based on the direction of movement and gravity direction
+        AdjustSpriteFlip(horizontalInput);
+
+        animator.SetBool("Walking", horizontalInput != 0);
     }
 
-    void Gravity()
+    void HandleGravitySwitching()
     {
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            // Gravity up (towards the ceiling)
             SwitchGravity(new Vector3(0, 9.81f, 0), Quaternion.Euler(180, 0, 0), GravityDirection.Up);
             AdjustSpriteOrientation(GravityDirection.Up);
         }
         else if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            // Gravity right (towards the right wall)
             SwitchGravity(new Vector3(9.81f, 0, 0), Quaternion.Euler(0, 0, -90), GravityDirection.Right);
             AdjustSpriteOrientation(GravityDirection.Right);
         }
         else if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            // Gravity left (towards the left wall)
             SwitchGravity(new Vector3(-9.81f, 0, 0), Quaternion.Euler(0, 0, 90), GravityDirection.Left);
             AdjustSpriteOrientation(GravityDirection.Left);
         }
         else if (Input.GetKeyDown(KeyCode.DownArrow))
         {
-            // Gravity down (normal)
             SwitchGravity(new Vector3(0, -9.81f, 0), Quaternion.Euler(0, 0, 0), GravityDirection.Down);
             AdjustSpriteOrientation(GravityDirection.Down);
         }
@@ -101,7 +103,6 @@ public class PlayerScript : MonoBehaviour
 
     void SwitchGravity(Vector3 newGravity, Quaternion newRotation, GravityDirection newGravityDirection)
     {
-        // Apply new gravity and rotation
         Physics.gravity = newGravity;
         transform.rotation = newRotation;
         currentGravityDirection = newGravityDirection;
@@ -121,6 +122,7 @@ public class PlayerScript : MonoBehaviour
                 break;
         }
     }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Blackhole"))
@@ -132,17 +134,69 @@ public class PlayerScript : MonoBehaviour
             SwitchGravity(new Vector3(0, 9.81f, 0), Quaternion.Euler(180, 0, 0), GravityDirection.Up);
             AdjustSpriteOrientation(GravityDirection.Up);
             canSwitch = false;
-            currentGravitySwap = other.gameObject; // Store the reference to the GravitySwap object
+            currentGravitySwap = other.gameObject; 
         }
-        if(other.CompareTag("Switch"))
+        if (other.CompareTag("Switch"))
         {
             Destroy(other.gameObject);
             if (currentGravitySwap != null)
             {
-                Destroy(currentGravitySwap); // Destroy the GravitySwap object
-                currentGravitySwap = null; // Clear the reference
-                canSwitch = true; // Allow gravity switching again
+                Destroy(currentGravitySwap);
+                currentGravitySwap = null;
+                canSwitch = true;
             }
+        }
+        if (other.CompareTag("Ground"))
+        {
+            isGrounded = true;
+            animator.SetTrigger("Landing");
+        }
+    }
+
+    void AdjustSpriteFlip(float horizontalInput)
+    {
+        switch (currentGravityDirection)
+        {
+            case GravityDirection.Up:
+                if (horizontalInput > 0)
+                {
+                    spriteRenderer.flipX = true;
+                }
+                else if (horizontalInput < 0)
+                {
+                    spriteRenderer.flipX = false;
+                }
+                break;
+            case GravityDirection.Down:
+                if (horizontalInput > 0)
+                {
+                    spriteRenderer.flipX = false;
+                }
+                else if (horizontalInput < 0)
+                {
+                    spriteRenderer.flipX = true;
+                }
+                break;
+            case GravityDirection.Left:
+                if (horizontalInput > 0)
+                {
+                    spriteRenderer.flipX = true;
+                }
+                else if (horizontalInput < 0)
+                {
+                    spriteRenderer.flipX = false;
+                }
+                break;
+            case GravityDirection.Right:
+                if (horizontalInput > 0)
+                {
+                    spriteRenderer.flipX = true;
+                }
+                else if (horizontalInput < 0)
+                {
+                    spriteRenderer.flipX = false;
+                }
+                break;
         }
     }
 
@@ -150,8 +204,19 @@ public class PlayerScript : MonoBehaviour
     {
         if (other.CompareTag("GravitySwap"))
         {
-            canSwitch = true; // Unlock gravity switching
+            canSwitch = true;
+        }
+        if (other.CompareTag("Ground"))
+        {
+            isGrounded = false;
+        }
+    }
+
+    private void UpdateAnimationStates()
+    {
+        if (!isGrounded && rb.velocity.y < 0)
+        {
+            animator.SetTrigger("Falling");
         }
     }
 }
-
